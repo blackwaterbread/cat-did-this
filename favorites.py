@@ -13,17 +13,22 @@ api_key = ""
 api_secret = ""
 access_token = ""
 access_secret = ""
+target_user_id = ""
 
 auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_secret)
 api = tweepy.API(auth)
-favorites = api.get_favorites(user_id = "", count = 200)
+favorites = api.get_favorites(user_id = target_user_id, count = 200)
 for tweet in favorites:
     print(f"{tweet.id} ", end='')
     if hasattr(tweet, 'extended_entities'):
         print("Downloading...", end='')
-        for entity in tweet.extended_entities['media']:
-            download(f"{entity['media_url_https']}")
-            print(' Done!')
+        try:
+            for entity in tweet.extended_entities['media']:
+                download(f"{entity['media_url_https']}")
+                print(' Done!')
+            api.destroy_favorite(tweet.id)
+        except:
+            print(' Something wrong with download!')
     else:
         print("This tweet doesn't have media...")
-    api.destroy_favorite(tweet.id)
+        api.destroy_favorite(tweet.id)
